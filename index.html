@@ -253,13 +253,13 @@
               </div>
               <div class="mb-3">
                 <label>熱門標籤：</label>
-                <p><button type="button" class="btn btn-sm me-1 mt-1"
+                <p><button type="button" class="btn btn-sm me-1 my-1"
                     :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
                     v-for="tag in famousTags.famous" @click="addTagClicked(tag[0],'#commentTags')">
                     {{tag[0]}}
                   </button>
 
-                  <button type="button" class="btn btn-sm me-1 mt-1"
+                  <button type="button" class="btn btn-sm me-1 my-1"
                     :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
                     v-show="commentFormObj.tagsShowMore" v-for="tag in famousTags.notFamous"
                     @click="addTagClicked(tag[0],'#commentTags')">
@@ -375,13 +375,13 @@
             </div>
             <div class="mb-3">
               <label>熱門標籤：</label>
-              <p><button type="button" class="btn btn-sm me-1 mt-1"
+              <p><button type="button" class="btn btn-sm me-1 my-1"
                   :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
                   v-for="tag in famousTags.famous" @click="addTagClicked(tag[0],'#addComicTags')">
                   {{tag[0]}}
                 </button>
 
-                <button type="button" class="btn btn-sm me-1 mt-1"
+                <button type="button" class="btn btn-sm me-1 my-1"
                   :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
                   v-show="commentFormObj.tagsShowMore" v-for="tag in famousTags.notFamous"
                   @click="addTagClicked(tag[0],'#addComicTags')">
