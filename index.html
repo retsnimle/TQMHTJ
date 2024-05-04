@@ -59,7 +59,7 @@
     /* .card-move, */
     .card-leave-active,
     .card-enter-active {
-      transition: 
+      transition:
         opacity 0.5s,
         transform 1s ease;
 
@@ -87,7 +87,7 @@
         <!-- 最左邊的符號 -->
         <a v-show="!isLoading" class="navbar-brand cursor_pointer"
           @click="raloadComicList(); raloadCommentList(); raloadTagList();">湯</a>
-        <a v-show="isLoading" class="spinner-border"></a>
+        <a v-show="isLoading" class="spinner-grow text-light"></a>
 
         <!-- 按鈕們 -->
         <ul class="navbar-nav me-auto">
@@ -305,7 +305,8 @@
               <button type="button" class="btn" :class="[ isLoading? 'btn-secondary': 'btn-primary' ]" id="sendComment"
                 @click="
                 sendComment(commentFormObj.commentMethodType)
-                " :disabled="isLoading">{{isLoading?'處理中……':'確定送出'}}</button>
+                " :disabled="isLoading"><span v-show="isLoading" class="spinner-border spinner-border-sm"
+                  aria-hidden="true"></span>{{isLoading?'處理中……':'確定送出'}}</button>
             </div>
           </div>
 
@@ -422,7 +423,8 @@
             <button type="button" class="btn" :class="[ isLoading? 'btn-secondary': 'btn-primary' ]" id="sendComment"
               @click="
                 sendComment(commentFormObj.commentMethodType)
-                " :disabled="isLoading">{{isLoading?'處理中……':'確定送出'}}</button>
+                " :disabled="isLoading"><span v-show="isLoading" class="spinner-border spinner-border-sm"
+                aria-hidden="true"></span>{{isLoading?'處理中……':'確定送出'}}</button>
           </div>
 
 
@@ -460,7 +462,7 @@
         </div>
       </div>
       <!-- 主要的卡片顯示區塊 -->
-      <transition-group name="card" tag="div" class="row" style="position: relative;">
+      <transition-group name="card" tag="div" class="row">
 
         <!-- <div class="row"> -->
         <!-- 為空時顯示佔位符 -->
@@ -500,7 +502,8 @@
         </search-card-item>
         <button class="btn col-12 pt-2" :key="-1"
           v-show="addComicObj.searchComicList.length != 0 && tabSelected =='addComic'"
-          @click="searchBtnClicked('loadMore')" :disabled="isLoading">{{isLoading?'讀取中……':'載入更多'}}</button>
+          @click="searchBtnClicked('loadMore')" :disabled="isLoading"><span v-show="isLoading" class="spinner-border spinner-border-sm"
+          aria-hidden="true"></span>{{isLoading?'讀取中……':'載入更多'}}</button>
         <!-- </div> -->
       </transition-group>
     </div>
