@@ -65,7 +65,7 @@
       <div class="container-fluid">
         <!-- 最左邊的符號 -->
         <a v-show="!isLoading" class="navbar-brand cursor_pointer"
-          @click="raloadComicList; raloadCommentList; raloadTagList">湯</a>
+          @click="raloadComicList(); raloadCommentList(); raloadTagList();">湯</a>
         <a v-show="isLoading" class="spinner-border"></a>
 
         <!-- 按鈕們 -->
@@ -444,7 +444,7 @@
         <!-- <div class="row"> -->
         <!-- 為空時顯示佔位符 -->
 
-        <template v-if="comicMainPageList.length === 0">
+        <template v-if="comicMainPageList.length === 0 && searchText.length === 0">
           <template v-for="n in 12" :key="n">
             <div class="col-12  col-sm-6 col-md-4 col-lg-3 mt-2 px-1">
               <div class="card px-0">
@@ -652,7 +652,7 @@
           case 'already':
             this.tabSelected = 'comic';
             this.searchBy = 'tittle',
-            this.comicMainPageObj.selectedID = value.data;
+              this.comicMainPageObj.selectedID = value.data;
             this.comicMainPageObj.comicModal.show();
             $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
             break;
