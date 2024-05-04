@@ -280,7 +280,7 @@
           </div>
           <div class="collapse multi-collapse" id="commentFormPw">
             <form id="commentPw" class="px-2">
-              <div class="row align-items-center">
+              <div class="row align-items-center mb-1">
                 <div class="col-auto">
                   <label for="deletePw" class=" col-form-label">文章密碼</label>
                 </div>
@@ -399,7 +399,7 @@
               <textarea class="form-control" v-model="commentFormObj.userComment" rows="3"></textarea>
             </div>
 
-            <div class="row align-items-center">
+            <div class="row align-items-center mb-1">
               <div class="col-auto">
                 <label for="deletePw" class=" col-form-label">文章密碼</label>
               </div>
@@ -502,8 +502,8 @@
         </search-card-item>
         <button class="btn col-12 pt-2" :key="-1"
           v-show="addComicObj.searchComicList.length != 0 && tabSelected =='addComic'"
-          @click="searchBtnClicked('loadMore')" :disabled="isLoading"><span v-show="isLoading" class="spinner-border spinner-border-sm"
-          aria-hidden="true"></span>{{isLoading?'讀取中……':'載入更多'}}</button>
+          @click="searchBtnClicked('loadMore')" :disabled="isLoading"><span v-show="isLoading"
+            class="spinner-border spinner-border-sm" aria-hidden="true"></span>{{isLoading?'讀取中……':'載入更多'}}</button>
         <!-- </div> -->
       </transition-group>
     </div>
@@ -676,7 +676,8 @@
           case 'already':
             this.tabSelected = 'comic';
             this.searchBy = 'tittle',
-              this.comicMainPageObj.selectedID = value.data;
+            this.searchText = '';
+            this.comicMainPageObj.selectedID = value.data;
             this.comicMainPageObj.comicModal.show();
             $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
             break;
