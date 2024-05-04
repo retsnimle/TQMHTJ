@@ -1,0 +1,1063 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>湯群漫畫推薦網
+  </title>
+
+  <!-- 導入 favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <!-- <link rel="manifest" href="/site.webmanifest"> -->
+
+  <!-- 導入 Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- 導入 Vue -->
+  <script type="importmap">
+    {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+      } 
+    }</script>
+
+
+
+  <style media="screen">
+    .grayscale {
+      filter: grayscale(100%);
+    }
+
+    .cursor_pointer {
+      cursor: pointer;
+    }
+
+
+    .list-move,
+    /* 对移动中的元素应用的过渡 */
+    .list-enter-active,
+    .list-leave-active {
+      transition: all 0.5s ease;
+    }
+
+    .list-enter-from,
+    .list-leave-to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+
+    /* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+    /* .list-leave-active {
+      position: absolute;
+    } */
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- 最上邊的導航列 -->
+    <nav class="navbar navbar-expand bg-body-tertiary sticky-top" data-bs-theme="dark">
+      <div class="container-fluid">
+        <!-- 最左邊的符號 -->
+        <a v-show="!isLoading" class="navbar-brand cursor_pointer"
+          @click="raloadComicList; raloadCommentList; raloadTagList">湯</a>
+        <a v-show="isLoading" class="spinner-border"></a>
+
+        <!-- 按鈕們 -->
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link cursor_pointer" @click="tabSelected = 'comic'"
+              :class="{'active': tabSelected === 'comic'}">
+              <i class="bi-book d-md-none"></i>
+              <span class="d-none d-md-block"><i class="bi-book"></i> 漫畫一覽</span></a>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link cursor_pointer" @click="tabSelected = 'comment'" :class="{'active': tabSelected === 'comment'}">
+              <i class="bi-chat-left-dots d-md-none"></i>
+              <span class="d-none d-md-block"><i class="bi-chat-left-dots"></i> 評論一覽</span></a>
+          </li> -->
+          <li class="nav-item">
+            <a class="nav-link cursor_pointer" @click="tabSelected = 'addComic'"
+              :class="{'active': tabSelected === 'addComic'}">
+              <i class="bi-file-earmark-plus d-md-none"></i>
+              <span class="d-none d-md-block"><i class="bi-file-earmark-plus"></i> 新增漫畫</span></a>
+          </li>
+        </ul>
+
+        <!-- 測試區域 -->
+        <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          {{"DEV"}}
+        </button> -->
+
+        <form class="d-flex" role="search">
+          <div class="input-group">
+            <input class="form-control" type="search" placeholder="搜尋關鍵字" v-model="searchText" aria-label="Search">
+            <select class="form-select" id="inputGroupSelect01" v-model="searchBy" v-show="tabSelected == 'comic'">
+              <option value="tittle">漫畫名稱</option>
+              <option value="user">推薦人</option>
+              <option value="tag">標籤</option>
+            </select>
+            <button class="btn btn-outline-success" type="submit" @click="searchBtnClicked">
+              <i class="bi-search d-md-none"></i>
+              <span class="d-none d-md-block">搜尋</span></a>
+
+            </button>
+          </div>
+        </form>
+      </div>
+    </nav>
+
+
+    <!-- 測試用 -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">測試區域</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {{addComicObj.searchComicList}}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 展示漫畫和留言的模態視窗 -->
+    <div class="modal fade" id="mainComicModal" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">選擇的漫畫</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body" v-if="comicMainPageList.length >0">
+            <div class="clearfix">
+              <div class="col-4   position-relative float-start m-1 ">
+                <img class="img-fluid rounded " :src="comicMainPageList[selectedComicIndex][6]"
+                  :class="{ 'grayscale' : comicMainPageList[selectedComicIndex][5] <0 }">
+              </div>
+              <h5>{{comicMainPageList[selectedComicIndex][1]}}</h5>
+
+              <p>作者：{{comicMainPageList[selectedComicIndex][2]}} <a :href="comicMainPageList[selectedComicIndex][7]"
+                  target="_blank">漫畫鏈結</a></p>
+
+              <p>推薦人：{{comicMainPageList[selectedComicIndex][3]}}</p>
+              <template v-if="comicMainPageList[selectedComicIndex][5] >0 ">
+                <span class='text-warning' v-for="n in Math.round(comicMainPageList[selectedComicIndex][5])">★</span>
+                <span
+                  v-for="n in 3-Math.round(comicMainPageList[selectedComicIndex][5])">☆</span><span>({{comicMainPageList[selectedComicIndex][5]}})</span>
+              </template>
+              <span v-else class="text-danger">💀💀💀</span>
+              <p class=" mb-1">{{comicMainPageList[selectedComicIndex][9]}} 則評論。</p>
+              <!-- <transition-group name="list" tag="p"> -->
+              <p>
+                <span class="badge text-bg-secondary me-1" :key="tag"
+                  v-for="tag in comicMainPageList[selectedComicIndex][4].split(',')"
+                  @click.stop="clickTag(tag)">{{tag}}</span>
+              </p>
+              <!-- </transition-group> -->
+            </div>
+
+            <!-- <ul class="list-group mt-1" v-if="selectedCommentList.length > 0"> -->
+            <!-- 評論在這裡 -->
+            <transition-group name="list" tag="ul" class="list-group mt-1" v-if="selectedCommentList.length > 0">
+              <comment-li-item v-for="(comment,index) in selectedCommentList" :key="index" :comment="comment"
+                :index="index" :selected-comment-id="commentFormObj.selectedCommentId"
+                @comment-clicked="commentClicked"></comment-li-item>
+
+
+              <a class="list-group-item list-group-item-action list-group-item-success text-center" :key="-1"
+                data-bs-toggle="collapse" href=".multi-collapse" role="button" aria-expanded="false" @click="
+                  commentFormObj.commentMethodType = 'addComment';
+                  commentFormObj.selectedCommentId = 0;
+                  commentFormObj.userComment = '';
+                  commentFormObj.stars = 0;
+                ">
+                我也要留言
+              </a>
+            </transition-group>
+            <!-- </ul> -->
+
+          </div>
+
+          <!-- 折疊起來的表單部分 -->
+          <div class="collapse multi-collapse" id="commentForm">
+            <form id="comment" class="px-2">
+
+              <div class="mb-3">
+                <label for="login_field">推薦者<span class="text-danger"><small>(必填)</small></span></label>
+                <input type="text" name="login" class="form-control" v-model="commentFormObj.userName"
+                  placeholder="請盡量保持名稱一致">
+              </div>
+              <div class="mb-3">
+                <label for="stars">推薦星數</label>
+
+                <span @click='commentFormObj.stars = -10' id='start1' class='cursor_pointer'
+                  :class="parseInt(commentFormObj.stars)<0 ?'text-danger':''">{{parseInt(commentFormObj.stars)<0 ?'💀'
+                    :'💀'}}</span>
+
+                    <span @click='commentFormObj.stars = 1' id='start1' class='cursor_pointer'
+                      :class="parseInt(commentFormObj.stars)>=1 ?'text-warning':''">{{parseInt(commentFormObj.stars)>=1
+                      ?'★'
+                      :'☆'}}</span>
+                    <span @click='commentFormObj.stars = 2' id='start2' class='cursor_pointer'
+                      :class="parseInt(commentFormObj.stars)>=2 ?'text-warning':''">{{parseInt(commentFormObj.stars)>=2
+                      ?'★'
+                      :'☆'}}</span>
+                    <span @click='commentFormObj.stars = 3' id='start3' class='cursor_pointer'
+                      :class="parseInt(commentFormObj.stars)>=3 ?'text-warning':''">{{parseInt(commentFormObj.stars)>=3
+                      ?'★'
+                      :'☆'}}</span>
+                    <span>{{(commentFormObj.stars <
+                        0)?'（幹你娘雷暴）':''}}{{(commentFormObj.stars==1)?'（不錯看。）':''}}{{(commentFormObj.stars==2)?'（超好看！）':''}}{{(commentFormObj.stars==3)?'（人生必看！！）':''}}</span>
+
+              </div>
+              <div class="mb-3">
+
+                <label for="tags">新增/刪除標籤<span class="text-danger"><small>(不想更改就不動就好)</small></span></label>
+                <input type="text" class="form-control" name="tags" id="commentTags">
+              </div>
+              <div class="mb-3">
+                <label>熱門標籤：</label>
+                <p><button type="button" class="btn btn-sm me-1 mt-1"
+                    :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
+                    v-for="tag in famousTags.famous" @click="addTagClicked(tag[0],'#commentTags')">
+                    {{tag[0]}}
+                  </button>
+
+                  <button type="button" class="btn btn-sm me-1 mt-1"
+                    :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
+                    v-show="commentFormObj.tagsShowMore" v-for="tag in famousTags.notFamous"
+                    @click="addTagClicked(tag[0],'#commentTags')">
+                    {{tag[0]}}
+                  </button>
+
+                  <small class="text-muted cursor_pointer mf-1"
+                    @click='commentFormObj.tagsShowMore = !commentFormObj.tagsShowMore'>{{ commentFormObj.tagsShowMore ?
+                    "收起" : "展開全部…"}}</small>
+
+                </p>
+              </div>
+              <div class="mb-3">
+                <label for="userComment">留言內容</label>
+                <textarea class="form-control" v-model="commentFormObj.userComment" rows="3"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="collapse multi-collapse" id="commentFormPw">
+            <form id="commentPw" class="px-2">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <label for="deletePw" class=" col-form-label">文章密碼</label>
+                </div>
+                <div class="col">
+                  <input type="password" class="form-control" v-model='commentFormObj.pw'
+                    placeholder="修改或刪除評論時需要的一次性密碼">
+                </div>
+              </div>
+            </form>
+
+
+
+            <div class="modal-footer">
+              <span class="text-danger">{{commentFormObj.warning}}</span>
+              <button type="button" class="btn btn-secondary" @click="
+                commentFormObj.userComment = '';
+                commentFormObj.stars = 0;
+                commentFormObj.selectedCommentId = 0;
+                comicMainPageObj.comicModalCollapse.hide();
+                comicMainPageObj.comicModalCollapsePw.hide();
+                ">取消</button>
+              <button type="button" class="btn" :class="[ isLoading? 'btn-secondary': 'btn-primary' ]" id="sendComment"
+                @click="
+                sendComment(commentFormObj.commentMethodType)
+                " :disabled="isLoading">{{isLoading?'處理中……':'確定送出'}}</button>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增漫畫  -->
+    <div class="modal fade" id="addComicModal" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">選擇的漫畫</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body" v-if="addComicObj.searchComicList.length >0">
+            <div class="clearfix">
+              <div class="col-4   position-relative float-start m-1 ">
+                <img class="img-fluid rounded " :src="addComicObj.searchComicList[addComicObj.selected].Pic">
+              </div>
+              <h5>{{addComicObj.searchComicList[addComicObj.selected].Title}}</h5>
+
+              <p>作者：{{addComicObj.searchComicList[addComicObj.selected].Author.join(', ')}} <a
+                  :href="addComicObj.searchComicList[addComicObj.selected].Url" target="_blank">漫畫鏈結</a></p>
+
+              <p>{{addComicObj.searchComicList[addComicObj.selected].Content}}</p>
+            </div>
+          </div>
+
+          <form class="px-2">
+            <div class="mb-3">
+              <label for="login_field">推薦者<span class="text-danger"><small>(必填)</small></span></label>
+              <input type="text" name="login" class="form-control" v-model="commentFormObj.userName"
+                placeholder="請盡量保持名稱一致">
+            </div>
+            <div class="mb-3">
+              <label for="stars">推薦星數</label>
+
+              <span @click='commentFormObj.stars = -10' id='start1' class='cursor_pointer'
+                :class="parseInt(commentFormObj.stars)<0 ?'text-danger':''">{{parseInt(commentFormObj.stars)<0 ?'💀'
+                  :'💀'}}</span>
+
+                  <span @click='commentFormObj.stars = 1' id='start1' class='cursor_pointer'
+                    :class="parseInt(commentFormObj.stars)>=1 ?'text-warning':''">{{parseInt(commentFormObj.stars)>=1
+                    ?'★'
+                    :'☆'}}</span>
+                  <span @click='commentFormObj.stars = 2' id='start2' class='cursor_pointer'
+                    :class="parseInt(commentFormObj.stars)>=2 ?'text-warning':''">{{parseInt(commentFormObj.stars)>=2
+                    ?'★'
+                    :'☆'}}</span>
+                  <span @click='commentFormObj.stars = 3' id='start3' class='cursor_pointer'
+                    :class="parseInt(commentFormObj.stars)>=3 ?'text-warning':''">{{parseInt(commentFormObj.stars)>=3
+                    ?'★'
+                    :'☆'}}</span>
+                  <span>{{(commentFormObj.stars <
+                      0)?'（幹你娘雷暴）':''}}{{(commentFormObj.stars==1)?'（不錯看。）':''}}{{(commentFormObj.stars==2)?'（超好看！）':''}}{{(commentFormObj.stars==3)?'（人生必看！！）':''}}</span>
+
+            </div>
+            <div class="mb-3">
+
+              <label for="tags">新增/刪除標籤<span class="text-danger"><small>(不想更改就不動就好)</small></span></label>
+              <input type="text" class="form-control" name="tags" id="addComicTags">
+            </div>
+            <div class="mb-3">
+              <label>熱門標籤：</label>
+              <p><button type="button" class="btn btn-sm me-1 mt-1"
+                  :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
+                  v-for="tag in famousTags.famous" @click="addTagClicked(tag[0],'#addComicTags')">
+                  {{tag[0]}}
+                </button>
+
+                <button type="button" class="btn btn-sm me-1 mt-1"
+                  :class="parseInt(tag[1]) > 5 ? 'btn-warning' :   (parseInt(tag[1]) > 1 ? 'btn-info' : 'btn-secondary')"
+                  v-show="commentFormObj.tagsShowMore" v-for="tag in famousTags.notFamous"
+                  @click="addTagClicked(tag[0],'#addComicTags')">
+                  {{tag[0]}}
+                </button>
+
+                <small class="text-muted cursor_pointer mf-1"
+                  @click='commentFormObj.tagsShowMore = !commentFormObj.tagsShowMore'>{{ commentFormObj.tagsShowMore ?
+                  "收起" : "展開全部…"}}</small>
+
+              </p>
+            </div>
+            <div class="mb-3">
+              <label for="userComment">留言內容</label>
+              <textarea class="form-control" v-model="commentFormObj.userComment" rows="3"></textarea>
+            </div>
+
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <label for="deletePw" class=" col-form-label">文章密碼</label>
+              </div>
+              <div class="col">
+                <input type="password" class="form-control" v-model='commentFormObj.pw' placeholder="修改或刪除評論時需要的一次性密碼">
+              </div>
+            </div>
+          </form>
+
+
+
+          <div class="modal-footer">
+            <span class="text-danger">{{commentFormObj.warning}}</span>
+            <button type="button" class="btn btn-secondary" @click="
+                commentFormObj.userComment = '';
+                commentFormObj.stars = 0;
+                commentFormObj.selectedCommentId = 0;
+                comicMainPageObj.comicModalCollapse.hide();
+                comicMainPageObj.comicModalCollapsePw.hide();
+                ">取消</button>
+            <button type="button" class="btn" :class="[ isLoading? 'btn-secondary': 'btn-primary' ]" id="sendComment"
+              @click="
+                sendComment(commentFormObj.commentMethodType)
+                " :disabled="isLoading">{{isLoading?'處理中……':'確定送出'}}</button>
+          </div>
+
+
+
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-12 px-1 mt-2" v-show="tabSelected == 'comic'">
+          <div class="input-group">
+
+            <select class="form-select" v-model="comicMainPageObj.sortBy">
+              <option value="time">依照建立時間排序</option>
+              <option value="stars">依照平均星數排序</option>
+              <option value="comments">依照評論數量排序</option>
+              <option value="commentsTime">依照評論時間排序</option>
+            </select>
+
+            <label class="input-group-text" @click="comicMainPageObj.sortReverse = !comicMainPageObj.sortReverse">
+              {{ comicMainPageObj.sortBy === 'time' || comicMainPageObj.sortBy === 'commentsTime' ?
+              (comicMainPageObj.sortReverse ? '新到舊' :'舊到新') :
+              (comicMainPageObj.sortReverse ? '多到少' : '少到多')}}
+            </label>
+
+          </div>
+        </div>
+        <div class="col-12 px-1 mt-2"
+          v-show="addComicObj.searchError !== false || (tabSelected == 'addComic' && addComicObj.searchComicList.length == 0)">
+          <p class="text-center" :class="{'text-danger': addComicObj.searchError}">
+            {{addComicObj.searchError !== false ?'※'+addComicObj.searchError+'※':'(請於搜尋框內輸入欲新增的漫畫關鍵字。)'}}
+          </p>
+        </div>
+      </div>
+      <!-- 主要的卡片顯示區塊 -->
+      <transition-group name="list" tag="div" class="row">
+
+        <!-- <div class="row"> -->
+        <!-- 為空時顯示佔位符 -->
+
+        <template v-if="comicMainPageList.length === 0">
+          <template v-for="n in 12" :key="n">
+            <div class="col-12  col-sm-6 col-md-4 col-lg-3 mt-2 px-1">
+              <div class="card px-0">
+                <div class="card-header">
+                  <h6 class="mb-0 placeholder-glow"><span class="placeholder col-6"></span></h6>
+                </div>
+                <div class="card-body p-2">
+                  <div class="clearfix">
+                    <div class="col-4 col-sm-6  position-relative float-start m-1 ">
+                      <img class="img-fluid rounded " src="https://placehold.co/132x176?text=Loading...">
+                    </div>
+                    <p class="card-text placeholder-glow">
+                      <span class="placeholder col-5"></span>
+                      <span class="placeholder col-3"></span>
+                      <span class="placeholder col-3"></span>
+                      <span class="placeholder col-4"></span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </template>
+
+
+        <comic-card-item v-show="tabSelected =='comic'" v-for="(comic,index) in comicMainPageList" :key="comic[0]"
+          :comic="comic" :index="index" @comic-clicked="comicClicked">
+        </comic-card-item>
+        <search-card-item v-show="tabSelected =='addComic'" v-for="(comic,index) in addComicObj.searchComicList"
+          :key="comic.Id" :comic="comic" :index="index" :comic-id-list="comicIdList"
+          @comic-clicked="searchComicClicked">
+        </search-card-item>
+        <button class="btn col-12 pt-2" :key="-1"
+          v-show="addComicObj.searchComicList.length != 0 && tabSelected =='addComic'"
+          @click="searchBtnClicked('loadMore')" :disabled="isLoading">{{isLoading?'讀取中……':'載入更多'}}</button>
+        <!-- </div> -->
+      </transition-group>
+    </div>
+
+  </div>
+
+
+  <!-- 導入 jquery的 taginput -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery-tags-input@1.3.5/dist/jquery.tagsinput.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/jquery-tags-input@1.3.5/dist/jquery.tagsinput.min.css" rel="stylesheet">
+
+
+  <!-- 導入 Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+</body>
+
+<script type="module">
+  import { createApp, ref, computed, onMounted } from 'vue'
+  // import VueTagsInput from '@johmun/vue-tags-input';
+  import MyComponent from './components/my-component.js'
+  import ComicCardItem from './components/comic-card-item.js'
+  import SearchCardItem from './components/search-card-item.js'
+  import CommentLiItem from './components/comment-li-item.js'
+
+
+  const app = createApp({
+    setup() {
+      return {
+      }
+    },
+
+
+    // 設定全域變數
+    data() {
+      return {
+        testObj:
+          { count: 0 },
+
+        tabSelected: 'comic',
+        isLoading: true,
+        searchText: '',
+        searchBy: 'tittle',
+
+        rawData: {
+          comicListArr: [],
+          commentsListArr: [],
+          tagsListArr: []
+        },
+
+        comicMainPageObj: {
+          sortBy: 'commentsTime',
+          sortReverse: true,
+          selected: 0,
+          selectedID: 0,
+          comicModal: null,
+          comicModalCollapse: null,
+          comicModalCollapsePw: null
+        },
+
+        // 用於新增評論的表單相關
+        commentFormObj: {
+          commentMethodType: 'addComment',
+          selectedCommentId: 0,
+          userName: '',
+          stars: 0,
+          userComment: '',
+          pw: '',
+          warning: '',
+          tagInputText: '',
+          tagsShowMore: false
+        },
+
+        // 用於新增漫畫的表單相關
+        addComicObj: {
+          selected: 0,
+          comicModal: null,
+          searchComicList: [],
+          loadPage: 1,
+          searchError: false
+        }
+
+      }
+    },
+
+    methods: {
+      raloadComicList() {
+        this.isLoading = true;
+        fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?type=comicList')
+          .then(response => response.json())
+          .then(json => {
+            var db = JSON.stringify(json);
+
+            console.log('Comic List geted');
+            this.rawData.comicListArr = JSON.parse(db);
+            this.isLoading = false;
+          })
+          .catch((error) => {
+            console.log(`Error: ${error}`);
+          })
+      },
+      raloadCommentList() {
+        this.isLoading = true;
+        fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?type=commentList')
+          .then(response => response.json())
+          .then(json => {
+            var db = JSON.stringify(json);
+
+            console.log('Comment List geted');
+            this.rawData.commentsListArr = JSON.parse(db);
+            this.isLoading = false;
+          })
+          .catch((error) => {
+            console.log(`Error: ${error}`);
+          })
+      },
+      raloadTagList() {
+        this.isLoading = true;
+        fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?type=searchTags')
+          .then(response => response.json())
+          .then(json => {
+            var db = JSON.stringify(json);
+
+            console.log('Tag List geted');
+            this.rawData.tagsListArr = JSON.parse(db);
+            this.isLoading = false;
+          })
+          .catch((error) => {
+            console.log(`Error: ${error}`);
+          })
+      },
+      //取得主漫畫列表被點擊的方法
+      comicClicked(value) {
+        switch (value.type) {
+          case 'comic':
+            this.comicMainPageObj.selectedID = value.data;
+            this.comicMainPageObj.comicModal.show();
+            $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
+
+            break;
+
+          case 'tag':
+            this.searchText = value.data;
+            this.searchBy = 'tag';
+            break;
+
+          case 'user':
+            this.searchText = value.data;
+            this.searchBy = 'user';
+            break;
+
+          default:
+            break;
+        }    // alert(JSON.stringify(value))
+      },
+
+      //取得搜尋結果被點擊的方法
+      searchComicClicked(value) {
+        switch (value.type) {
+          case 'comic':
+            this.commentFormObj.commentMethodType = 'addComic';
+            this.addComicObj.selected = value.data;
+            this.addComicObj.loadPage = 1;
+            this.addComicObj.comicModal.show();
+            // $('#commentTags').importTags(this.comicMainPageList[this.comicMainPageObj.selected][4]);
+            break;
+
+          case 'already':
+            this.tabSelected = 'comic';
+            this.searchBy = 'tittle',
+            this.comicMainPageObj.selectedID = value.data;
+            this.comicMainPageObj.comicModal.show();
+            $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
+            break;
+          // case 'loadMore':
+          // this.commentFormObj.commentMethodType = 'addComic';
+          //   this.addComicObj.selected = value.data;
+          //   this.addComicObj.loadPage++;
+
+        }
+      },
+
+      //取得評論被點擊的方法
+      commentClicked(value) {
+        switch (value.type) {
+          case 'change':
+            // console.log('selected: ' + value.data);
+            $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
+            this.commentFormObj.commentMethodType = 'changeComment';
+            this.commentFormObj.selectedCommentId = value.data;
+            this.comicMainPageObj.comicModalCollapse.show();
+            this.comicMainPageObj.comicModalCollapsePw.show();
+            var commentArr = this.rawData.commentsListArr.slice(0);
+            commentArr.forEach(element => {
+              if (element[0] == value.data) {
+                this.commentFormObj.userName = element[3];
+                this.commentFormObj.stars = element[2];
+                this.commentFormObj.userComment = element[4];
+                return;
+              }
+            });
+
+            break;
+
+          case 'delete':
+            this.commentFormObj.commentMethodType = 'delete';
+            this.commentFormObj.selectedCommentId = value.data;
+            this.comicMainPageObj.comicModalCollapsePw.show();
+            this.comicMainPageObj.comicModalCollapse.hide();
+
+            break;
+
+          default:
+            break;
+        }    // alert(JSON.stringify(value))
+      },
+
+      addTagClicked(tagsInput, domId) {
+        $(domId).addTag(tagsInput);
+      },
+
+      searchBtnClicked(type = 'first') {
+        if (this.tabSelected != 'addComic') return;
+        if (type === 'loadMore') {
+          this.addComicObj.loadPage++;
+        }
+
+        this.isLoading = true;
+        var postBody = {
+          type: 'searchComic',
+          searchComic: this.searchText,
+          loadPage: this.addComicObj.loadPage
+        }
+        var payload = Object.keys(postBody).map(function (k) {
+          return encodeURIComponent(k) + '=' + encodeURIComponent(postBody[k])
+        }).join('&');
+        fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?' + payload,
+          {
+            signal: AbortSignal.timeout(5000)
+          })
+          .then(response => response.json())
+          .then(json => {
+            var db = JSON.stringify(json);
+
+            console.log('search result geted');
+            if (type === 'loadMore') this.addComicObj.searchComicList = this.addComicObj.searchComicList.concat(JSON.parse(db));
+            else this.addComicObj.searchComicList = JSON.parse(db);
+            this.isLoading = false;
+            this.addComicObj.searchError = false;
+          })
+          .catch((error) => {
+            if (error.name === "TimeoutError") {
+              console.error("Timeout: It took more than 5 seconds to get the result!");
+              this.addComicObj.searchError = '搜尋超時，可能是伺服器障礙，請重試。'
+              this.isLoading = false;
+            }
+            else {
+              console.log(error);
+              this.addComicObj.searchError = '異常：' + error
+              this.isLoading = false;
+            }
+          })
+
+
+      },
+
+      // 用於新增評論的表單相關
+      sendComment(type) {
+
+        if (type === 'addComic') {
+          this.commentFormObj.tagInputText = $('#addComicTags').val();
+        } else {
+          this.commentFormObj.tagInputText = $('#commentTags').val();
+        }
+
+
+        if (this.commentFormObj.stars == 0 && type == 'addComic') {
+          this.commentFormObj.warning = '請選擇推薦星數。';
+        } else if (this.commentFormObj.tagInputText.length == 0 && type == 'addComic') {
+          this.commentFormObj.warning = '請至少選擇一個標籤。';
+        } else if (this.commentFormObj.userName.length == 0 && type != 'delete') {
+          this.commentFormObj.warning = '請輸入推薦人。';
+        } else if (this.commentFormObj.stars == 0 && this.commentFormObj.userComment.length == 0 && type != 'delete') {
+          this.commentFormObj.warning = '星數和留言內容至少擇一輸入。';
+        } else {
+          this.isLoading = true;
+
+          if (type === 'addComic') {
+            var postBody = {
+              type: type,
+              userName: this.commentFormObj.userName,
+              stars: this.commentFormObj.stars,
+              tags: this.commentFormObj.tagInputText,
+              pw: this.commentFormObj.pw,
+              userComment: this.commentFormObj.userComment,
+              title: this.addComicObj.searchComicList[this.addComicObj.selected].Title,
+              author: this.addComicObj.searchComicList[this.addComicObj.selected].Author.join(),
+              url: this.addComicObj.searchComicList[this.addComicObj.selected].Url,
+              bigPic: this.addComicObj.searchComicList[this.addComicObj.selected].Pic,
+              id: this.addComicObj.searchComicList[this.addComicObj.selected].Id,
+              AddTime: String(Date()),
+              Pic: this.addComicObj.searchComicList[this.addComicObj.selected].Pic,
+              isEnd: (this.addComicObj.searchComicList[this.addComicObj.selected].Status == '已完結' ? true : false),
+              lastPartTime: this.addComicObj.searchComicList[this.addComicObj.selected].LastPartTime,
+            };
+          } else if (type === 'addComment') {
+            var postBody = {
+              type: type,
+              userName: this.commentFormObj.userName,
+              stars: this.commentFormObj.stars,
+              tags: this.commentFormObj.tagInputText,
+              pw: this.commentFormObj.pw,
+              userComment: this.commentFormObj.userComment,
+              id: this.comicMainPageList[this.selectedComicIndex][0],
+            };
+          } else if (type === 'changeComment') {
+            var postBody = {
+              type: type,
+              userName: this.commentFormObj.userName,
+              stars: this.commentFormObj.stars,
+              tags: this.commentFormObj.tagInputText,
+              pw: this.commentFormObj.pw,
+              userComment: this.commentFormObj.userComment,
+              id: this.commentFormObj.selectedCommentId,
+            };
+          } else if (type === 'delete') {
+            var postBody = {
+              type: type,
+              userName: this.commentFormObj.userName,
+              pw: this.commentFormObj.pw,
+              id: this.commentFormObj.selectedCommentId,
+            };
+          }
+          var payload = Object.keys(postBody).map(function (k) {
+            return encodeURIComponent(k) + '=' + encodeURIComponent(postBody[k])
+          }).join('&');
+          fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?' + payload
+            , {
+              redirect: "follow",
+              method: "POST",
+              body: JSON.stringify(postBody),
+              headers: {
+                "Content-Type": "text/plain;charset=utf-8",
+              },
+            })
+            .then(response => {
+              return response.json();
+            })
+            .then(json => {
+              console.log(json);
+              var db = JSON.stringify(json);
+              console.log(db);
+              var ajaxData = JSON.parse(db);
+              this.isLoading = false;
+              if (ajaxData.state === 'success') {
+                this.commentFormObj.stars = 0;
+                this.commentFormObj.tagInputText = '';
+                this.commentFormObj.userComment = '';
+                this.commentFormObj.selectedCommentId = 0;
+
+                this.commentFormObj.warning = '';
+                if (type === 'addComic') {
+                  $('#addComicTags').importTags('');
+                  this.addComicObj.comicModal.hide();
+                  this.raloadComicList();
+                  this.raloadTagList();
+                  this.raloadCommentList();
+                  // $('#comicDetailModal').modal('hide');
+                } else {
+                  this.commentFormObj.commentMethodType = 'addComment';
+                  this.raloadComicList();
+                  this.raloadTagList();
+                  this.raloadCommentList();
+                  this.comicMainPageObj.comicModalCollapse.hide();
+                  this.comicMainPageObj.comicModalCollapsePw.hide();
+                  //this.search('reload');
+                  // $('#commentForm').collapse('hide')
+                }
+              } else if (ajaxData.state === 'duplicated') {
+                this.commentFormObj.warning = '書單裡面已有這本漫畫囉，去留言吧！';
+              } else if (ajaxData.state === 'pwWrong') {
+                this.commentFormObj.warning = '密碼錯誤！';
+              } else if (ajaxData.state === 'noPw') {
+                this.commentFormObj.warning = '文章沒有密碼，修改失敗。';
+              } else {
+                this.commentFormObj.warning = ajaxData.state;
+              }
+
+            })
+            .catch((error) => {
+              console.log(error);
+
+            })
+        }
+      },
+
+      traceComicIndex(comicId) {
+        return comicMainPageList.findIndex(p => p[0] == "comicId");
+      }
+
+    },
+
+    // 計算屬性
+    computed: {
+      comicIdList() {
+        return this.rawData.comicListArr.map((p) => p[0]);
+      },
+
+      selectedComicIndex() {
+        let comicIndex = this.comicMainPageList.findIndex(p => p[0] == this.comicMainPageObj.selectedID);
+        return comicIndex == -1 ? 0 : comicIndex
+      },
+
+
+      comicMainPageList() {
+
+        var text = this.searchText.toLowerCase();
+        var comicList = this.rawData.comicListArr.slice(0);
+        var commentList = this.rawData.commentsListArr.slice(0);
+        commentList.reverse();
+        for (var i = 0; i < comicList.length; i++) {
+          for (var j = 0; j < commentList.length; j++) {
+            if (comicList[i][0] === commentList[j][1]
+              && commentList[j][5] != 1) {
+              comicList[i][12] = commentList[j][0]; //12 代表最新留言的序號
+              comicList[i][13] = commentList[j][3]; //13 代表最新留言的留言人
+              if (!commentList[j][4]) comicList[i][14] = '(評了 ' + commentList[j][2] + ' 星)'; //14 代表最新留言的留言
+              else comicList[i][14] = commentList[j][4]; //14 代表最新留言的留言
+              break;
+            }
+          }
+        }
+        // var comicList = this.comicListWithCommentInfo.slice(0);
+
+        if (this.comicMainPageObj.sortBy === 'time') {
+          if (this.comicMainPageObj.sortReverse) comicList.reverse();
+        } else if (this.comicMainPageObj.sortBy === 'stars') {
+          comicList.reverse();
+          if (this.comicMainPageObj.sortReverse) {
+            comicList.sort(function (a, b) {
+              if (a[5] > b[5]) return -1;
+              else if (a[5] < b[5]) return 1;
+              else if (a[9] > b[9]) return -1;
+              else if (a[9] < b[9]) return 1;
+              else return 0;
+            });
+          } else if (!this.comicMainPageObj.sortReverse) {
+            comicList.sort(function (a, b) {
+              if (a[5] > b[5]) return 1;
+              else if (a[5] < b[5]) return -1;
+              else if (a[9] > b[9]) return -1;
+              else if (a[9] < b[9]) return 1;
+              else return 0;
+            });
+          }
+        } else if (this.comicMainPageObj.sortBy === 'comments') {
+          comicList.reverse();
+          if (this.comicMainPageObj.sortReverse) {
+            comicList.sort(function (a, b) {
+              if (a[9] > b[9]) return -1;
+              else if (a[9] < b[9]) return 1;
+              else if (a[5] > b[5]) return -1;
+              else if (a[5] < b[5]) return 1;
+              else return 0;
+            });
+          } else if (!this.comicMainPageObj.sortReverse) {
+            comicList.sort(function (a, b) {
+              if (a[9] > b[9]) return 1;
+              else if (a[9] < b[9]) return -1;
+              else if (a[5] > b[5]) return -1;
+              else if (a[5] < b[5]) return 1;
+              else return 0;
+            });
+          }
+        } else if (this.comicMainPageObj.sortBy === 'commentsTime') {
+          comicList.reverse();
+          if (this.comicMainPageObj.sortReverse) {
+            comicList.sort(function (a, b) {
+              if (a[12] > b[12]) return -1;
+              else if (a[12] < b[12]) return 1;
+              else if (a[5] > b[5]) return -1;
+              else if (a[5] < b[5]) return 1;
+              else return 0;
+            });
+          } else if (!this.comicMainPageObj.sortReverse) {
+            comicList.sort(function (a, b) {
+              if (a[12] > b[12]) return 1;
+              else if (a[12] < b[12]) return -1;
+              else if (a[5] > b[5]) return -1;
+              else if (a[5] < b[5]) return 1;
+              else return 0;
+            });
+          }
+        }
+        // return comicList;
+        if (this.tabSelected != 'comic' || text.length == 0) return comicList;
+        var dis = false;
+        if (text.match(/^-/) != null) {
+          dis = true;
+          text = this.searchText.replace(/^-/, '');
+        }
+
+
+        if (this.searchBy === 'tittle') {
+          return comicList.filter(function (value) {
+            let tempBool = (String(value[1]).toLowerCase().indexOf(text) != -1 || String(value[2]).toLowerCase().indexOf(text) != -1);
+            return (dis ? !tempBool : tempBool);
+          });
+        } else if (this.searchBy === 'user') {
+          return comicList.filter(function (value) {
+            let tempBool = String(value[3]).toLowerCase().indexOf(text) != -1;
+            return (dis ? !tempBool : tempBool);
+          });
+        } else if (this.searchBy === 'tag') {
+          return comicList.filter(function (value) {
+            let tempBool = String(value[4]).toLowerCase().indexOf(text) != -1;
+            return (dis ? !tempBool : tempBool);
+          });
+        }
+      },
+
+
+      selectedCommentList: function () {
+        if (this.rawData.commentsListArr.lenth == 0 || this.rawData.comicListArr.lenth == 0) {
+          return [];
+        }
+        if (this.comicMainPageList.length == 0) return [];
+        var commentArr = this.rawData.commentsListArr.slice(0);
+        if (!this.comicMainPageList[this.selectedComicIndex][0]) return [];
+        var comicId = this.comicMainPageList[this.selectedComicIndex][0];
+        return commentArr.filter(
+          value => {
+            return (value[1] == comicId && value[5] == 0) ? true : false;
+          });
+      },
+
+      famousTags: function () {
+        var tempArr = this.rawData.tagsListArr.slice(0);
+        // tempArr.splice(15);
+        return {
+          'notFamous': tempArr.splice(15),
+          'famous': tempArr
+        };
+      },
+
+    },
+
+
+    mounted() {
+      console.log(`the component is now mounted.`)
+      this.comicMainPageObj.comicModal = new bootstrap.Modal('#mainComicModal', {});
+      this.addComicObj.comicModal = new bootstrap.Modal('#addComicModal', {});
+      this.comicMainPageObj.comicModalCollapse = new bootstrap.Collapse('#commentForm', { toggle: false });
+      this.comicMainPageObj.comicModalCollapsePw = new bootstrap.Collapse('#commentFormPw', { toggle: false });
+      // console.log(this.comicMainPageObj);
+      this.raloadComicList();
+      this.raloadCommentList();
+      this.raloadTagList();
+      $('#commentTags').tagsInput({
+        'unique': true,
+        'defaultText': '添加標籤',
+        'placeholderColor': '#666666'
+      });
+      $('#addComicTags').tagsInput({
+        'unique': true,
+        'defaultText': '添加標籤',
+        'placeholderColor': '#666666'
+      });
+
+    }
+  })
+  app.component('MyComponent', MyComponent)
+  app.component('ComicCardItem', ComicCardItem)
+  app.component('SearchCardItem', SearchCardItem)
+  app.component('CommentLiItem', CommentLiItem)
+  app.mount('#app')
+</script>
+
+</html>
