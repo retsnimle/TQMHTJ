@@ -70,8 +70,8 @@ export default {
           </div>
           <div class="card-footer  text-truncate" :class=
           "{'bg-black bg-gradient text-light' : isUgly ,
-          'text-body-secondary' : !isUgly}">
-          <em>{{comic[13]+': '+comic[14]}}</em>
+          'text-body-secondary' : !isUgly }">
+          <em>{{comic[13] != undefined ? comic[13] + ': ' +comic[14] : '留言讀取中……'}}</em>
           </div>
       </div>
     </div>
