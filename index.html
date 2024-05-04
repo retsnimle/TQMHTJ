@@ -904,7 +904,7 @@
         commentList.reverse();
         for (var i = 0; i < comicList.length; i++) {
           for (var j = 0; j < commentList.length; j++) {
-            if (comicList[i][0] === commentList[j][1]
+            if (comicList[i][0] == commentList[j][1]
               && commentList[j][5] != 1) {
               comicList[i][12] = commentList[j][0]; //12 代表最新留言的序號
               comicList[i][13] = commentList[j][3]; //13 代表最新留言的留言人
