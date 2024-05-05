@@ -159,23 +159,32 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
-          <div class="modal-header">
-            <h1 class="modal-title fs-5">選擇的漫畫</h1>
+          <div class="modal-header d-flex">
+            <h1 class="modal-title fs-5 flex-fill">選擇的漫畫</h1>
+            <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#updateInfo"
+              aria-expanded="false" aria-controls="collapseExample">
+              更新漫畫資訊
+            </button>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
-          <div class="modal-body" v-if="comicMainPageList.length >0">
+          <div class="modal-body mb-0" v-if="comicMainPageList.length >0">
             <div class="clearfix">
               <div class="col-4   position-relative float-start m-1 ">
                 <img class="img-fluid rounded " :src="comicMainPageList[selectedComicIndex][6]"
                   :class="{ 'grayscale' : comicMainPageList[selectedComicIndex][5] <0 }">
+                    <div  class="position-absolute top-0 start-0 p-0 d-flex align-items-start">
+                      <span class="badge bg-success my-0  me-1" v-if="comicMainPageList[selectedComicIndex][10]">完結</span>
+                      <span class="badge bg-warning text-dark my-0  me-1" v-if="parseInt(new Date - new Date(comicMainPageList[selectedComicIndex][11])) / 3600000 /24 > 180 && !comicMainPageList[selectedComicIndex][10]">疑似棄坑</span>       
+                    </div>
               </div>
               <h5>{{comicMainPageList[selectedComicIndex][1]}}</h5>
 
               <p>作者：{{comicMainPageList[selectedComicIndex][2]}} <a :href="comicMainPageList[selectedComicIndex][7]"
-                  target="_blank">漫畫鏈結</a></p>
+                  target="_blank">漫畫鏈結</a>
 
-              <p>推薦人：{{comicMainPageList[selectedComicIndex][3]}}</p>
+              <p class="mb-1">推薦人：{{comicMainPageList[selectedComicIndex][3]}}</p>
+
               <template v-if="comicMainPageList[selectedComicIndex][5] >0 ">
                 <span class='text-warning' v-for="n in Math.round(comicMainPageList[selectedComicIndex][5])">★</span>
                 <span
@@ -191,7 +200,41 @@
               </p>
               <!-- </transition-group> -->
             </div>
+          </div>
 
+          <div class="collapse" id="updateInfo">
+            <div class="modal-body">
+              <p><button class="btn btn-primary btn-sm" type="button" :disabled="isLoading || updateInfoObj.tempComicInfo.status != undefined" @click="getUpdateInfo">
+                  嘗試取得新的漫畫資訊
+                </button> <button class="btn btn-primary btn-sm" :disabled="isLoading || updateInfoObj.tempComicInfo.status == undefined"  type="button" @click="updateInfo">
+                  上傳資訊到資料庫
+                </button> <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#updateInfo" 
+                  @click="updateInfoObj.tempComicInfo = {status: undefined,lastUpdateDate: undefined,picUrl: undefined}; updateInfoObj.searchError = undefined;">
+                  關閉
+                </button>
+                <span v-show="isLoading" class="spinner-border spinner-border-sm" aria-hidden="true">
+              </p>
+              <p v-show="updateInfoObj.searchError">{{updateInfoObj.searchError}}</p>
+
+
+              <div class="clearfix" v-show="updateInfoObj.tempComicInfo.status != undefined">
+                <div class="col-3 position-relative float-start m-1 ">
+                  <img class="img-fluid rounded " :src="updateInfoObj.tempComicInfo.picUrl">
+                </div>
+                <P>資料版本：{{updateInfoObj.tempComicInfo.lastUpdateDate}}</P>
+                <p>已完結：{{updateInfoObj.tempComicInfo.status ? '是' : '否'}}
+                  <button class="btn btn-primary btn-sm" type="button"
+                    @click="updateInfoObj.tempComicInfo.status = !updateInfoObj.tempComicInfo.status">
+                    切換
+                  </button>
+                </p>
+              </div>
+              <!-- {{updateInfoObj}} -->
+
+            </div>
+          </div>
+
+          <div class="modal-body mt-0" v-if="comicMainPageList.length >0">
             <!-- <ul class="list-group mt-1" v-if="selectedCommentList.length > 0"> -->
             <!-- 評論在這裡 -->
             <transition-group name="list" tag="ul" class="list-group mt-1" v-if="selectedCommentList.length > 0">
@@ -586,12 +629,97 @@
           searchComicList: [],
           loadPage: 1,
           searchError: false
+        },
+
+        updateInfoObj: {
+          tempComicInfo: {
+            status: undefined,
+            lastUpdateDate: undefined,
+            picUrl: undefined,
+          },
+          searchError: undefined,
         }
 
       }
     },
 
     methods: {
+      getUpdateInfo() {
+        this.isLoading = true;
+        fetch('https://script.google.com/macros/s/AKfycbyah_tN71FA1HwPvt73i_lHERio1adXwFP_X52VFR9qZPAJLKhIldHM3U7MIvRzo1t68g/exec?type=getComicInfo&comicId=' + this.comicMainPageObj.selectedID,
+          {
+            signal: AbortSignal.timeout(5000)
+          }
+        )
+          .then(response => response.json())
+          .then(json => {
+            var db = JSON.stringify(json);
+
+            console.log('UpdateInfo geted');
+            this.updateInfoObj.tempComicInfo = JSON.parse(db);
+            this.updateInfoObj.searchError = undefined;
+            this.isLoading = false;
+          })
+          .catch((error) => {
+            if (error.name === "TimeoutError") {
+              console.error("Timeout: It took more than 5 seconds to get the result!");
+              this.updateInfoObj.searchError = '搜尋超時，可能是伺服器障礙，請重試。'
+              this.isLoading = false;
+            }
+            else {
+              console.log(error);
+              this.updateInfoObj.searchError = '異常：' + error
+              this.isLoading = false;
+            }
+          })
+      },
+
+      updateInfo() {
+        this.isLoading = true;
+        var postBody = {
+          type: 'setComicState',
+          comic: JSON.stringify(this.updateInfoObj.tempComicInfo),
+          comicId: this.comicMainPageObj.selectedID
+        }
+
+        fetch('https://script.google.com/macros/s/AKfycbyah_tN71FA1HwPvt73i_lHERio1adXwFP_X52VFR9qZPAJLKhIldHM3U7MIvRzo1t68g/exec',
+          {
+            redirect: "follow",
+            method: "POST",
+            body: JSON.stringify(postBody),
+            headers: {
+              "Content-Type": "text/plain;charset=utf-8",
+            },
+          })
+          .then(response => response.json())
+          .then(json => {
+            var db = JSON.stringify(json);
+            console.log(db);
+            console.log('info updated');
+            this.raloadComicList();
+            this.isLoading = false;
+            this.addComicObj.searchError = false;
+            this.updateInfoObj.tempComicInfo = {
+              status: undefined,
+              lastUpdateDate: undefined,
+              picUrl: undefined,
+            };
+          })
+          .catch((error) => {
+            if (error.name === "TimeoutError") {
+              console.error("Timeout: It took more than 5 seconds to get the result!");
+              this.addComicObj.searchError = '搜尋超時，可能是伺服器障礙，請重試。'
+              this.isLoading = false;
+            }
+            else {
+              console.log(error);
+              this.addComicObj.searchError = '異常：' + error
+              this.isLoading = false;
+            }
+          })
+
+
+      },
       raloadComicList() {
         this.isLoading = true;
         fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?type=comicList')
@@ -676,7 +804,7 @@
           case 'already':
             this.tabSelected = 'comic';
             this.searchBy = 'tittle',
-            this.searchText = '';
+              this.searchText = '';
             this.comicMainPageObj.selectedID = value.data;
             this.comicMainPageObj.comicModal.show();
             $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
@@ -843,7 +971,7 @@
           var payload = Object.keys(postBody).map(function (k) {
             return encodeURIComponent(k) + '=' + encodeURIComponent(postBody[k])
           }).join('&');
-          fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?' + payload
+          fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec' 
             , {
               redirect: "follow",
               method: "POST",
