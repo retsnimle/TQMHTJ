@@ -170,13 +170,15 @@
 
           <div class="modal-body mb-0" v-if="comicMainPageList.length >0">
             <div class="clearfix">
-              <div class="col-4   position-relative float-start m-1 ">
-                <img class="img-fluid rounded " :src="comicMainPageList[selectedComicIndex][6]"
+              <div class="col-3   position-relative float-start m-1 ">
+                <img class="img-fluid rounded "
+                  :src="comicMainPageList[selectedComicIndex][6].replace('cpic/b/','cpic/h/')"
                   :class="{ 'grayscale' : comicMainPageList[selectedComicIndex][5] <0 }">
-                    <div  class="position-absolute top-0 start-0 p-0 d-flex align-items-start">
-                      <span class="badge bg-success my-0  me-1" v-if="comicMainPageList[selectedComicIndex][10]">完結</span>
-                      <span class="badge bg-warning text-dark my-0  me-1" v-if="parseInt(new Date - new Date(comicMainPageList[selectedComicIndex][11])) / 3600000 /24 > 180 && !comicMainPageList[selectedComicIndex][10]">疑似棄坑</span>       
-                    </div>
+                <div class="position-absolute top-0 start-0 p-0 d-flex align-items-start">
+                  <span class="badge bg-success my-0  me-1" v-if="comicMainPageList[selectedComicIndex][10]">完結</span>
+                  <span class="badge bg-warning text-dark my-0  me-1"
+                    v-if="parseInt(new Date - new Date(comicMainPageList[selectedComicIndex][11])) / 3600000 /24 > 180 && !comicMainPageList[selectedComicIndex][10]">疑似棄坑</span>
+                </div>
               </div>
               <h5>{{comicMainPageList[selectedComicIndex][1]}}</h5>
 
@@ -204,15 +206,19 @@
 
           <div class="collapse" id="updateInfo">
             <div class="modal-body">
-              <p><button class="btn btn-primary btn-sm" type="button" :disabled="isLoading || updateInfoObj.tempComicInfo.status != undefined" @click="getUpdateInfo">
+              <p><button class="btn btn-primary btn-sm" type="button"
+                  :disabled="isLoading || updateInfoObj.tempComicInfo.status != undefined" @click="getUpdateInfo">
                   嘗試取得新的漫畫資訊
-                </button> <button class="btn btn-primary btn-sm" :disabled="isLoading || updateInfoObj.tempComicInfo.status == undefined"  type="button" @click="updateInfo">
+                </button> <button class="btn btn-primary btn-sm"
+                  :disabled="isLoading || updateInfoObj.tempComicInfo.status == undefined" type="button"
+                  @click="updateInfo">
                   上傳資訊到資料庫
-                </button> <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#updateInfo" 
+                </button> <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#updateInfo"
                   @click="updateInfoObj.tempComicInfo = {status: undefined,lastUpdateDate: undefined,picUrl: undefined}; updateInfoObj.searchError = undefined;">
                   關閉
                 </button>
-                <span v-show="isLoading" class="spinner-border spinner-border-sm" aria-hidden="true">
+                <span v-show="isLoading" class="spinner-border spinner-border-sm" aria-hidden="true"> </span>
               </p>
               <p v-show="updateInfoObj.searchError">{{updateInfoObj.searchError}}</p>
 
@@ -498,9 +504,10 @@
           </div>
         </div>
         <div class="col-12 px-1 mt-2"
-          v-show="addComicObj.searchError !== false || (tabSelected == 'addComic' && addComicObj.searchComicList.length == 0)">
+          v-show="tabSelected == 'addComic' && (addComicObj.searchError !== false  || addComicObj.searchComicList.length == 0)">
           <p class="text-center" :class="{'text-danger': addComicObj.searchError}">
             {{addComicObj.searchError !== false ?'※'+addComicObj.searchError+'※':'(請於搜尋框內輸入欲新增的漫畫關鍵字。)'}}
+            <span v-show="isLoading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
           </p>
         </div>
       </div>
@@ -852,10 +859,12 @@
         }    // alert(JSON.stringify(value))
       },
 
+      //取得tag被點擊的方法
       addTagClicked(tagsInput, domId) {
         $(domId).addTag(tagsInput);
       },
 
+      //取得搜尋按鈕被點擊的方法
       searchBtnClicked(type = 'first') {
         if (this.tabSelected != 'addComic') return;
         if (type === 'loadMore') {
@@ -971,7 +980,7 @@
           var payload = Object.keys(postBody).map(function (k) {
             return encodeURIComponent(k) + '=' + encodeURIComponent(postBody[k])
           }).join('&');
-          fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec' 
+          fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec'
             , {
               redirect: "follow",
               method: "POST",
