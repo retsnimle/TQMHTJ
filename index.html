@@ -275,7 +275,7 @@
               <div class="mb-3">
                 <label for="stars">推薦星數</label>
 
-                <span @click='commentFormObj.stars = -10' id='start1' class='cursor_pointer'
+                <span @click='commentFormObj.stars = -10' id='start0' class='cursor_pointer'
                   :class="parseInt(commentFormObj.stars)<0 ?'text-danger':''">{{parseInt(commentFormObj.stars)<0 ?'💀'
                     :'💀'}}</span>
 
@@ -397,7 +397,7 @@
             <div class="mb-3">
               <label for="stars">推薦星數</label>
 
-              <span @click='commentFormObj.stars = -10' id='start1' class='cursor_pointer'
+              <span @click='commentFormObj.stars = -10' id='start0' class='cursor_pointer'
                 :class="parseInt(commentFormObj.stars)<0 ?'text-danger':''">{{parseInt(commentFormObj.stars)<0 ?'💀'
                   :'💀'}}</span>
 
@@ -419,7 +419,7 @@
             </div>
             <div class="mb-3">
 
-              <label for="tags">新增/刪除標籤<span class="text-danger"><small>(不想更改就不動就好)</small></span></label>
+              <label for="tags">新增/刪除標籤</label>
               <input type="text" class="form-control" name="tags" id="addComicTags">
             </div>
             <div class="mb-3">
