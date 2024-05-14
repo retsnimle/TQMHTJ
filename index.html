@@ -20,10 +20,13 @@
   <!-- 導入 Vue -->
   <script type="importmap">
     {
-    "imports": {
-      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
-      } 
-    }</script>
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+        "vue-demi": "https://esm.sh/vue-demi@0.14/lib/v3/index.mjs?external=vue",
+        "@vueuse/shared": "https://esm.sh/@vueuse/shared@10/index.mjs?external=vue-demi",
+        "@vueuse/core": "https://esm.sh/@vueuse/core@10/index.mjs?external=@vueuse/shared,vue-demi"
+        } 
+      }</script>
 
 
 
@@ -51,15 +54,10 @@
     }
 
     /* 对移动中的元素应用的过渡 */
-    .card-move {
-      transition: all 1s ease;
-    }
-
-
-    /* .card-move, */
+    .card-move,
     .card-leave-active,
     .card-enter-active {
-      transition: all 1s ease;
+      transition: all .5s ease;
 
     }
 
@@ -109,7 +107,7 @@
 
         <!-- 測試區域 -->
         <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          {{"DEV"}}
+          {{this.bottomVisible + " : " + this.loadCardsNum}}
         </button> -->
 
         <form class="d-flex" role="search">
@@ -552,6 +550,7 @@
           v-show="addComicObj.searchComicList.length != 0 && tabSelected =='addComic'"
           @click="searchBtnClicked('loadMore')" :disabled="isLoading"><span v-show="isLoading"
             class="spinner-border spinner-border-sm" aria-hidden="true"></span>{{isLoading?'讀取中……':'載入更多'}}</button>
+         <div class="col-12 pt-2 pb-5 text-center" ref="pageBottom">{{isLoading ? '':((loadCardsNum <= rawData.comicListArr.length)? '' : '向下滾動以載入')}}</div>   
       </div>
 
     </div>
