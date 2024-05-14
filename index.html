@@ -51,25 +51,22 @@
     }
 
     /* 对移动中的元素应用的过渡 */
-    /* .card-move {
+    .card-move {
       transition: all 1s ease;
-    } */
+    }
 
 
     /* .card-move, */
-    /* .card-leave-active,
+    .card-leave-active,
     .card-enter-active {
-      transition:
-        opacity 0.5s,
-        transform 1s ease;
+      transition: all 1s ease;
 
     }
 
     .card-leave-to,
     .card-enter-from {
       opacity: 0;
-      transform: translateX(-500px);
-    } */
+    }
 
     /* 确保将离开的元素从布局流中删除
   以便能够正确地计算移动的动画。 */
@@ -512,50 +509,51 @@
         </div>
       </div>
       <!-- 主要的卡片顯示區塊 -->
-      <!-- <transition-group name="card" tag="div" class="row"> -->
+
 
       <div class="row">
         <!-- 為空時顯示佔位符 -->
-
-        <template v-if="comicMainPageList.length === 0 && searchText.length === 0">
-          <template v-for="n in 12" :key="n">
-            <div class="col-12  col-sm-6 col-md-4 col-lg-3 mt-2 px-1">
-              <div class="card px-0">
-                <div class="card-header">
-                  <h6 class="mb-0 placeholder-glow"><span class="placeholder col-6"></span></h6>
-                </div>
-                <div class="card-body p-2">
-                  <div class="clearfix">
-                    <div class="col-4 col-sm-6  position-relative float-start m-1 ">
-                      <img class="img-fluid rounded " src="https://placehold.co/132x176?text=Loading...">
+        <transition-group name="card">
+          <template v-if="comicMainPageList.length === 0 && searchText.length === 0">
+            <template v-for="n in 12" :key="n">
+              <div class="col-12  col-sm-6 col-md-4 col-lg-3 mt-2 px-1">
+                <div class="card px-0">
+                  <div class="card-header">
+                    <h6 class="mb-0 placeholder-glow"><span class="placeholder col-6"></span></h6>
+                  </div>
+                  <div class="card-body p-2">
+                    <div class="clearfix">
+                      <div class="col-4 col-sm-6  position-relative float-start m-1 ">
+                        <img class="img-fluid rounded " src="https://placehold.co/132x176?text=Loading...">
+                      </div>
+                      <p class="card-text placeholder-glow">
+                        <span class="placeholder col-5"></span>
+                        <span class="placeholder col-3"></span>
+                        <span class="placeholder col-3"></span>
+                        <span class="placeholder col-4"></span>
+                      </p>
                     </div>
-                    <p class="card-text placeholder-glow">
-                      <span class="placeholder col-5"></span>
-                      <span class="placeholder col-3"></span>
-                      <span class="placeholder col-3"></span>
-                      <span class="placeholder col-4"></span>
-                    </p>
                   </div>
                 </div>
               </div>
-            </div>
+            </template>
           </template>
-        </template>
 
 
-        <comic-card-item v-show="tabSelected =='comic'" v-for="(comic,index) in comicMainPageList" :key="comic[0]"
-          :comic="comic" :index="index" @comic-clicked="comicClicked">
-        </comic-card-item>
-        <search-card-item v-show="tabSelected =='addComic'" v-for="(comic,index) in addComicObj.searchComicList"
-          :key="comic.Id" :comic="comic" :index="index" :comic-id-list="comicIdList"
-          @comic-clicked="searchComicClicked">
-        </search-card-item>
+          <comic-card-item v-show="tabSelected =='comic'" v-for="(comic,index) in comicMainPageList" :key="comic[0]"
+            :comic="comic" :index="index" @comic-clicked="comicClicked">
+          </comic-card-item>
+          <search-card-item v-show="tabSelected =='addComic'" v-for="(comic,index) in addComicObj.searchComicList"
+            :key="comic.Id" :comic="comic" :index="index" :comic-id-list="comicIdList"
+            @comic-clicked="searchComicClicked">
+          </search-card-item>
+        </transition-group>
         <button class="btn col-12 pt-2" :key="-1"
           v-show="addComicObj.searchComicList.length != 0 && tabSelected =='addComic'"
           @click="searchBtnClicked('loadMore')" :disabled="isLoading"><span v-show="isLoading"
             class="spinner-border spinner-border-sm" aria-hidden="true"></span>{{isLoading?'讀取中……':'載入更多'}}</button>
       </div>
-      <!-- </transition-group> -->
+
     </div>
 
   </div>
