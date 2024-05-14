@@ -550,7 +550,7 @@
           v-show="addComicObj.searchComicList.length != 0 && tabSelected =='addComic'"
           @click="searchBtnClicked('loadMore')" :disabled="isLoading"><span v-show="isLoading"
             class="spinner-border spinner-border-sm" aria-hidden="true"></span>{{isLoading?'讀取中……':'載入更多'}}</button>
-         <div class="col-12 pt-2 pb-5 text-center" ref="pageBottom">{{isLoading ? '':((loadCardsNum > rawData.comicListArr.length)? '' : '向下滾動以載入')}}</div>   
+         <div class="col-12 pt-2 pb-5 text-center" ref="pageBottom">{{isLoading ? '':((loadCardsNum > comicMainPageList.length)? '' : '向下滾動以載入')}}</div>   
       </div>
 
     </div>

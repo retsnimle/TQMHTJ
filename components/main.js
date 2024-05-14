@@ -619,9 +619,12 @@ export default {
     bottomVisible(newValue, oldValue) {
       if (newValue &&
         this.loadCardsNum <= this.rawData.comicListArr.length &&
-        this.tabSelected == 'comic'
+        this.tabSelected == 'comic'  
       ) {
-        this.loadCardsNum += 20;
+
+
+        if(this.searchText.length == 0)this.loadCardsNum += 20;
+        else if(this.loadCardsNum <= this.comicMainPageList.length)this.loadCardsNum += 20;
       }
     },
     tabSelected(newValue, oldValue) {
