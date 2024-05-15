@@ -30,7 +30,7 @@ export default {
       },
 
       comicMainPageObj: {
-        sortBy: 'commentsTime',
+        sortBy: 'time',
         sortReverse: true,
         selected: 0,
         selectedID: 0,
