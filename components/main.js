@@ -75,6 +75,48 @@ export default {
 
 
   methods: {
+
+    async copyURL(mytext) {
+      try {
+        await navigator.clipboard.writeText(mytext);
+        alert('連結已複製到剪貼簿');
+      } catch ($e) {
+        alert('抱歉，連結複製失敗');
+      }
+    },
+
+    /**
+     * Retrieves a GET parameter from the URL search string.
+     *
+     * @param {string} parameterName - the name of the parameter to retrieve
+     * @return {string|null} the value of the parameter, or null if not found
+     */
+    findGetParameter(parameterName) {
+      var result = null,
+        tmp = [];
+      location.search
+        .substr(1)
+        .split("&")
+        .forEach(function (item) {
+          tmp = item.split("=");
+          if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        });
+      return result;
+    },
+
+    getUrl() {
+      return window.location.href.split('?')[0];
+    },
+
+    /**
+     * Retrieves the update information for a comic.
+     *
+     * Sends a GET request to the Google Script API to fetch the comic info.
+     * If the request is successful, it updates the tempComicInfo object and sets searchError to undefined.
+     * If the request times out or encounters an error, it sets the searchError message accordingly.
+     *
+     * @return {void}
+     */
     getUpdateInfo() {
       this.isLoading = true;
       fetch('https://script.google.com/macros/s/AKfycbyah_tN71FA1HwPvt73i_lHERio1adXwFP_X52VFR9qZPAJLKhIldHM3U7MIvRzo1t68g/exec?type=getComicInfo&comicId=' + this.comicMainPageObj.selectedID,
@@ -619,12 +661,12 @@ export default {
     bottomVisible(newValue, oldValue) {
       if (newValue &&
         this.loadCardsNum <= this.rawData.comicListArr.length &&
-        this.tabSelected == 'comic'  
+        this.tabSelected == 'comic'
       ) {
 
 
-        if(this.searchText.length == 0)this.loadCardsNum += 20;
-        else if(this.loadCardsNum <= this.comicMainPageList.length)this.loadCardsNum += 20;
+        if (this.searchText.length == 0) this.loadCardsNum += 20;
+        else if (this.loadCardsNum <= this.comicMainPageList.length) this.loadCardsNum += 20;
       }
     },
     tabSelected(newValue, oldValue) {
@@ -633,10 +675,13 @@ export default {
     searchText(newValue, oldValue) {
       if (newValue.length == 0) {
         this.loadCardsNum = 20;
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
       }
     }
 
+  },
+
+  beforeMount() {
   },
 
   mounted() {
@@ -660,5 +705,12 @@ export default {
       'placeholderColor': '#666666'
     });
     this.bottomVisible = useElementVisibility(this.$refs.pageBottom)
+
+    let selectedName = this.findGetParameter('comicName');
+    // console.log();
+    if (selectedName) {
+      this.searchText = selectedName;
+      this.comicMainPageObj.comicModal.show();
+    }
   }
 }
