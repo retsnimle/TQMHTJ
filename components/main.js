@@ -20,6 +20,7 @@ export default {
 
       tabSelected: 'comic',
       isLoading: true,
+      selectedName: null,
       searchText: '',
       searchBy: 'tittle',
 
@@ -709,6 +710,7 @@ export default {
     let selectedName = this.findGetParameter('comicName');
     // console.log();
     if (selectedName) {
+      this.selectedName = selectedName;
       this.searchText = selectedName;
       this.comicMainPageObj.comicModal.show();
     }

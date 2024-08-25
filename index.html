@@ -112,7 +112,9 @@
 
         <form class="d-flex" role="search">
           <div class="input-group">
-            <input class="form-control" type="search" placeholder="搜尋關鍵字" v-model="searchText" aria-label="Search">
+            <input class="form-control" :class="{'bg-success':searchText.length > 0 && searchText===selectedName}"
+              type="search" placeholder="搜尋關鍵字" v-model="searchText" aria-label="Search">
+
             <select class="form-select" id="inputGroupSelect01" v-model="searchBy" v-show="tabSelected == 'comic'">
               <option value="tittle">漫畫名稱</option>
               <option value="user">推薦人</option>
@@ -121,8 +123,9 @@
             <button class="btn btn-outline-success" type="submit" @click.prevent="searchBtnClicked">
               <i class="bi-search d-md-none"></i>
               <span class="d-none d-md-block">搜尋</span></a>
-
             </button>
+
+
           </div>
         </form>
       </div>
@@ -175,7 +178,8 @@
                     v-if="parseInt(new Date - new Date(comicMainPageList[selectedComicIndex][11])) / 3600000 /24 > 180 && !comicMainPageList[selectedComicIndex][10]">疑似棄坑</span>
                 </div>
               </div>
-              <h5>{{comicMainPageList[selectedComicIndex][1]}} <i class="bi bi-share cursor_pointer" @click="copyURL(getUrl() + '?comicName='+ comicMainPageList[selectedComicIndex][1])"></i></h5>
+              <h5>{{comicMainPageList[selectedComicIndex][1]}} <i class="bi bi-share cursor_pointer"
+                  @click="copyURL(getUrl() + '?comicName='+ comicMainPageList[selectedComicIndex][1])"></i></h5>
 
               <p>作者：{{comicMainPageList[selectedComicIndex][2]}} <a :href="comicMainPageList[selectedComicIndex][7]"
                   target="_blank">漫畫鏈結</a>
