@@ -122,7 +122,7 @@ export default {
       this.isLoading = true;
       fetch('https://script.google.com/macros/s/AKfycbyah_tN71FA1HwPvt73i_lHERio1adXwFP_X52VFR9qZPAJLKhIldHM3U7MIvRzo1t68g/exec?type=getComicInfo&comicId=' + this.comicMainPageObj.selectedID,
         {
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(20000)
         }
       )
         .then(response => response.json())
@@ -349,7 +349,7 @@ export default {
       }).join('&');
       fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?' + payload,
         {
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(20000)
         })
         .then(response => response.json())
         .then(json => {
