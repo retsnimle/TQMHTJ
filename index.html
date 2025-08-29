@@ -31,6 +31,10 @@
 
 
   <style media="screen">
+    [v-cloak] {
+      display: none;
+    }
+
     .grayscale {
       filter: grayscale(100%);
     }
@@ -75,7 +79,7 @@
 </head>
 
 <body>
-  <div id="app">
+  <div id="app" v-cloak>
     <!-- 最上邊的導航列 -->
     <nav class="navbar navbar-expand bg-body-tertiary sticky-top" data-bs-theme="dark">
       <div class="container-fluid">
