@@ -12,12 +12,6 @@ export default {
       if (this.comic[10] === true) return true;
       else return false;
     },
-    isTailless() {
-      var now = new Date();
-      var postTime = new Date(this.comic[11]);
-      if (parseInt(now - postTime) / 3600000 / 24 > 180 && !this.isEnd) return true;
-      else return false;
-    },
     isUgly() {
       return (this.comic[5] <= 0);
     }
@@ -48,7 +42,6 @@ export default {
                 <div  class="position-absolute top-0 start-0 p-0 d-flex align-items-start">
                   <span class="badge bg-danger my-0 me-1" v-if="isNew">NEW</span>
                   <span class="badge bg-success my-0  me-1" v-if="isEnd">完結</span>
-                  <span class="badge bg-warning text-dark my-0  me-1" v-if="isTailless">疑似棄坑</span>       
                 </div>
                 
               </div>

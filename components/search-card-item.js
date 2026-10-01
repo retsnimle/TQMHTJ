@@ -11,12 +11,6 @@ export default {
       isEnd() {
         if (this.comic.Status == '已完結') return true;
         else return false;
-      },
-      isTailless() {
-        var now = new Date();
-        var postTime = new Date(this.comic.LastPartTime);
-        if (parseInt(now - postTime) / 3600000 / 24 > 180 && !this.isEnd) return true;
-        else return false;
       }      
     }, methods: {
       clickComic(index) {
@@ -40,7 +34,6 @@ export default {
                   <div  class="position-absolute top-0 start-0 p-0 d-flex align-items-start">
                   <span class="badge bg-danger my-0  me-1" v-if="alreadyHas">已在資料庫中</span>
                     <span class="badge bg-success my-0  me-1" v-if="isEnd">完結</span>
-                    <span class="badge bg-warning text-dark my-0  me-1" v-if="isTailless">疑似棄坑</span>       
                   </div>
                   
                 </div>

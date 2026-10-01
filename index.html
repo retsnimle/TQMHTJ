@@ -178,8 +178,6 @@
                   :class="{ 'grayscale' : comicMainPageList[selectedComicIndex][5] <0 }">
                 <div class="position-absolute top-0 start-0 p-0 d-flex align-items-start">
                   <span class="badge bg-success my-0  me-1" v-if="comicMainPageList[selectedComicIndex][10]">完結</span>
-                  <span class="badge bg-warning text-dark my-0  me-1"
-                    v-if="parseInt(new Date - new Date(comicMainPageList[selectedComicIndex][11])) / 3600000 /24 > 180 && !comicMainPageList[selectedComicIndex][10]">疑似棄坑</span>
                 </div>
               </div>
               <h5>{{comicMainPageList[selectedComicIndex][1]}} <i class="bi bi-share cursor_pointer"
