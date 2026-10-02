@@ -30,7 +30,8 @@ export default {
             <div class="card-body p-2" >
               <div class="clearfix">
                 <div class="col-4 col-sm-6  position-relative float-start m-1 ">
-                  <img class="img-fluid rounded " :src="comic.Pic" >
+                  <img class="img-fluid rounded " :src="comic.Pic"
+                    @error="$event.target.src='https://placehold.co/132x176?text=No+Cover'">
                   <div  class="position-absolute top-0 start-0 p-0 d-flex align-items-start">
                   <span class="badge bg-danger my-0  me-1" v-if="alreadyHas">已在資料庫中</span>
                     <span class="badge bg-success my-0  me-1" v-if="isEnd">完結</span>

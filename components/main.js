@@ -50,6 +50,8 @@ export default {
         pw: '',
         warning: '',
         tagInputText: '',
+        tagList: [],
+        tagInput: '',
         tagsShowMore: false
       },
 
@@ -239,13 +241,51 @@ export default {
           console.log(`Error: ${error}`);
         })
     },
+    // Tag 操作輔助方法
+    addTag(tag) {
+      if (!tag) return;
+      tag = String(tag).trim();
+      if (tag && !this.commentFormObj.tagList.includes(tag)) {
+        this.commentFormObj.tagList.push(tag);
+      }
+    },
+    addTagFromInput() {
+      if (this.commentFormObj.tagInput) {
+        const tags = this.commentFormObj.tagInput.split(/[,，\s]+/);
+        tags.forEach(t => this.addTag(t));
+        this.commentFormObj.tagInput = '';
+      }
+    },
+    handleTagKeydown(e) {
+      if ((e.key === ',' || e.key === '，') && this.commentFormObj.tagInput) {
+        e.preventDefault();
+        this.addTagFromInput();
+      } else if (e.key === 'Backspace' && !this.commentFormObj.tagInput && this.commentFormObj.tagList.length > 0) {
+        this.commentFormObj.tagList.pop();
+      }
+    },
+    removeTag(index) {
+      this.commentFormObj.tagList.splice(index, 1);
+    },
+    importTags(tagsStr) {
+      if (!tagsStr) {
+        this.commentFormObj.tagList = [];
+        return;
+      }
+      if (Array.isArray(tagsStr)) {
+        this.commentFormObj.tagList = tagsStr.map(t => String(t).trim()).filter(Boolean);
+      } else {
+        this.commentFormObj.tagList = String(tagsStr).split(',').map(t => t.trim()).filter(Boolean);
+      }
+    },
+
     //取得主漫畫列表被點擊的方法
     comicClicked(value) {
       switch (value.type) {
         case 'comic':
           this.comicMainPageObj.selectedID = value.data;
           this.comicMainPageObj.comicModal.show();
-          $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
+          this.importTags(this.comicMainPageList[this.selectedComicIndex][4]);
 
           break;
 
@@ -272,7 +312,8 @@ export default {
           this.addComicObj.selected = value.data;
           this.addComicObj.loadPage = 1;
           this.addComicObj.comicModal.show();
-          // $('#commentTags').importTags(this.comicMainPageList[this.comicMainPageObj.selected][4]);
+          let item = this.addComicObj.searchComicList[this.addComicObj.selected];
+          this.importTags(item && item.TagList ? item.TagList : []);
           break;
 
         case 'already':
@@ -281,7 +322,7 @@ export default {
             this.searchText = '';
           this.comicMainPageObj.selectedID = value.data;
           this.comicMainPageObj.comicModal.show();
-          $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
+          this.importTags(this.comicMainPageList[this.selectedComicIndex][4]);
           break;
         // case 'loadMore':
         // this.commentFormObj.commentMethodType = 'addComic';
@@ -296,7 +337,7 @@ export default {
       switch (value.type) {
         case 'change':
           // console.log('selected: ' + value.data);
-          $('#commentTags').importTags(this.comicMainPageList[this.selectedComicIndex][4]);
+          this.importTags(this.comicMainPageList[this.selectedComicIndex][4]);
           this.commentFormObj.commentMethodType = 'changeComment';
           this.commentFormObj.selectedCommentId = value.data;
           this.comicMainPageObj.comicModalCollapse.show();
@@ -328,7 +369,7 @@ export default {
 
     //取得tag被點擊的方法
     addTagClicked(tagsInput, domId) {
-      $(domId).addTag(tagsInput);
+      this.addTag(tagsInput);
     },
 
     //取得搜尋按鈕被點擊的方法
@@ -379,12 +420,8 @@ export default {
 
     // 用於新增評論的表單相關
     sendComment(type) {
-
-      if (type === 'addComic') {
-        this.commentFormObj.tagInputText = $('#addComicTags').val();
-      } else {
-        this.commentFormObj.tagInputText = $('#commentTags').val();
-      }
+      this.addTagFromInput();
+      this.commentFormObj.tagInputText = this.commentFormObj.tagList.join(',');
 
 
       if (this.commentFormObj.stars == 0 && type == 'addComic') {
@@ -468,12 +505,13 @@ export default {
             if (ajaxData.state === 'success') {
               this.commentFormObj.stars = 0;
               this.commentFormObj.tagInputText = '';
+              this.commentFormObj.tagList = [];
+              this.commentFormObj.tagInput = '';
               this.commentFormObj.userComment = '';
               this.commentFormObj.selectedCommentId = 0;
 
               this.commentFormObj.warning = '';
               if (type === 'addComic') {
-                $('#addComicTags').importTags('');
                 this.addComicObj.comicModal.hide();
                 this.raloadComicList();
                 this.raloadTagList();
@@ -695,16 +733,6 @@ export default {
     this.raloadComicList();
     this.raloadCommentList();
     this.raloadTagList();
-    $('#commentTags').tagsInput({
-      'unique': true,
-      'defaultText': '添加標籤',
-      'placeholderColor': '#666666'
-    });
-    $('#addComicTags').tagsInput({
-      'unique': true,
-      'defaultText': '添加標籤',
-      'placeholderColor': '#666666'
-    });
     this.bottomVisible = useElementVisibility(this.$refs.pageBottom)
 
     let selectedName = this.findGetParameter('comicName');
