@@ -307,8 +307,7 @@
                   </span>
                   <input type="text" class="border-0 flex-grow-1 p-0 m-0 shadow-none bg-transparent" style="outline: none; min-width: 120px;"
                     v-model="commentFormObj.tagInput"
-                    @keydown.enter.prevent="addTagFromInput"
-                    @keydown="handleTagKeydown"
+                    @keydown="handleTagKeydown($event)"
                     placeholder="輸入標籤後按 Enter 或逗號新增...">
                 </div>
               </div>
@@ -438,8 +437,7 @@
                 </span>
                 <input type="text" class="border-0 flex-grow-1 p-0 m-0 shadow-none bg-transparent" style="outline: none; min-width: 120px;"
                   v-model="commentFormObj.tagInput"
-                  @keydown.enter.prevent="addTagFromInput"
-                  @keydown="handleTagKeydown"
+                  @keydown="handleTagKeydown($event)"
                   placeholder="輸入標籤後按 Enter 或逗號新增...">
               </div>
             </div>

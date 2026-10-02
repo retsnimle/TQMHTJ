@@ -257,7 +257,7 @@ export default {
       }
     },
     handleTagKeydown(e) {
-      if ((e.key === ',' || e.key === '，') && this.commentFormObj.tagInput) {
+      if (e.key === 'Enter' || e.key === ',' || e.key === '，') {
         e.preventDefault();
         this.addTagFromInput();
       } else if (e.key === 'Backspace' && !this.commentFormObj.tagInput && this.commentFormObj.tagList.length > 0) {
