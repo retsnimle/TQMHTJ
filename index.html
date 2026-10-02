@@ -86,7 +86,7 @@
       <div class="container-fluid">
         <!-- 最左邊的符號 -->
         <a v-show="!isLoading" class="navbar-brand cursor_pointer"
-          @click="raloadComicList(); raloadCommentList(); raloadTagList();">湯</a>
+          @click="raloadComicList(true); raloadCommentList(true); raloadTagList(true);">湯</a>
         <a v-show="isLoading" class="spinner-grow text-light"></a>
 
         <!-- 按鈕們 -->
@@ -591,10 +591,10 @@
 
 <script type="module">
   import { createApp } from 'vue'
-  import main from './components/main.js?v=20261002'
-  import ComicCardItem from './components/comic-card-item.js?v=20261002'
-  import SearchCardItem from './components/search-card-item.js?v=20261002'
-  import CommentLiItem from './components/comment-li-item.js?v=20261002'
+  import main from './components/main.js?v=20261002_v3'
+  import ComicCardItem from './components/comic-card-item.js?v=20261002_v3'
+  import SearchCardItem from './components/search-card-item.js?v=20261002_v3'
+  import CommentLiItem from './components/comment-li-item.js?v=20261002_v3'
 
   const app = createApp(main)
   app.component('ComicCardItem', ComicCardItem)

@@ -196,46 +196,45 @@ export default {
 
 
     },
-    raloadComicList() {
-      this.isLoading = true;
+    raloadComicList(force = false) {
+      if (force || this.rawData.comicListArr.length === 0) {
+        this.isLoading = true;
+      }
       fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?type=comicList')
         .then(response => response.json())
         .then(json => {
-          var db = JSON.stringify(json);
-
-          console.log('Comic List geted');
-          this.rawData.comicListArr = JSON.parse(db);
+          this.rawData.comicListArr = json;
+          try {
+            localStorage.setItem('tqmhtj_comics', JSON.stringify(json));
+          } catch (e) { }
           this.isLoading = false;
         })
         .catch((error) => {
           console.log(`Error: ${error}`);
+          this.isLoading = false;
         })
     },
-    raloadCommentList() {
-      this.isLoading = true;
+    raloadCommentList(force = false) {
       fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?type=commentList')
         .then(response => response.json())
         .then(json => {
-          var db = JSON.stringify(json);
-
-          console.log('Comment List geted');
-          this.rawData.commentsListArr = JSON.parse(db);
-          this.isLoading = false;
+          this.rawData.commentsListArr = json;
+          try {
+            localStorage.setItem('tqmhtj_comments', JSON.stringify(json));
+          } catch (e) { }
         })
         .catch((error) => {
           console.log(`Error: ${error}`);
         })
     },
-    raloadTagList() {
-      this.isLoading = true;
+    raloadTagList(force = false) {
       fetch('https://script.google.com/macros/s/AKfycbzshA7Vgj-ff3dIeizZQhuX7yvNndNCemG1cFTxPWJlliSlA55_/exec?type=searchTags')
         .then(response => response.json())
         .then(json => {
-          var db = JSON.stringify(json);
-
-          console.log('Tag List geted');
-          this.rawData.tagsListArr = JSON.parse(db);
-          this.isLoading = false;
+          this.rawData.tagsListArr = json;
+          try {
+            localStorage.setItem('tqmhtj_tags', JSON.stringify(json));
+          } catch (e) { }
         })
         .catch((error) => {
           console.log(`Error: ${error}`);
@@ -721,6 +720,23 @@ export default {
   },
 
   beforeMount() {
+    try {
+      const cachedComics = localStorage.getItem('tqmhtj_comics');
+      const cachedComments = localStorage.getItem('tqmhtj_comments');
+      const cachedTags = localStorage.getItem('tqmhtj_tags');
+      if (cachedComics) {
+        this.rawData.comicListArr = JSON.parse(cachedComics);
+        this.isLoading = false;
+      }
+      if (cachedComments) {
+        this.rawData.commentsListArr = JSON.parse(cachedComments);
+      }
+      if (cachedTags) {
+        this.rawData.tagsListArr = JSON.parse(cachedTags);
+      }
+    } catch (e) {
+      console.log('Cache read error:', e);
+    }
   },
 
   mounted() {
