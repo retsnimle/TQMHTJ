@@ -553,7 +553,9 @@ export default {
   // 計算屬性
   computed: {
     comicIdList() {
-      return this.rawData.comicListArr.map((p) => p[0]);
+      return this.rawData.comicListArr
+        .filter((p) => parseInt(p[9] || 0) > 0)
+        .map((p) => p[0]);
     },
 
     selectedComicIndex() {
@@ -565,7 +567,7 @@ export default {
     comicMainPageList() {
 
       var text = this.searchText.toLowerCase();
-      var comicList = this.rawData.comicListArr.slice(0);
+      var comicList = this.rawData.comicListArr.filter((p) => parseInt(p[9] || 0) > 0);
       var commentList = this.rawData.commentsListArr.slice(0);
       commentList.reverse();
       for (var i = 0; i < comicList.length; i++) {
